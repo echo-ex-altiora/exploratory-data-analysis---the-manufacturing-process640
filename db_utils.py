@@ -1,7 +1,8 @@
 import yaml
-from sqlalchemy import create_engine
-from sqlalchemy import inspect
+from sqlalchemy import create_engine # type: ignore
+from sqlalchemy import inspect # type: ignore
 import pandas as pd
+from pandas.api.types import is_numeric_dtype
 
 
 def load_credentials():
@@ -39,16 +40,7 @@ class RDSDatabaseConnector:
     def save_data(self):
         dataframe = self.extract_data()
         dataframe.to_csv('the_manufacturing_process_dataframe.csv', index=False)
+    
+    def save_edited_dataframe(self, dataframe):
+        dataframe.to_csv('new_manufactoring_process_dataframe.csv', index=False)
 
-load = RDSDatabaseConnector()
-
-# load.save_data()
-
-failure_df = load.extract_data()
-
-print(failure_df.head())
-
-shape = failure_df.shape
-print(f'This dataset has {shape[0]} rows and {shape[1]} columns')
-
-failure_df.info()
