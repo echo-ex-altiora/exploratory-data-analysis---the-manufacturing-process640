@@ -5,7 +5,6 @@ import seaborn as sns # type: ignore
 import pandas as pd
 import numpy as np
 from scipy.stats import linregress # type: ignore
-import plotly.express as px # type: ignore
 from scipy.stats import normaltest # type: ignore
 from statsmodels.graphics.gofplots import qqplot # type: ignore
 from scipy.stats import chi2_contingency # type: ignore
@@ -38,23 +37,23 @@ class DataTransform:
             if unique == [0, 1]:
                 self.df[column] = self.df[column].astype('bool')
     
-    def manual_to_boolean(self, column_name):
+    def manual_to_boolean(self, column):
 
-        if column_name not in self.column_names:
+        if column not in self.column_names:
             print('Not a valid column name')
         else:
-            num_unique = self.df[column_name].nunique()
+            num_unique = self.df[column].nunique()
             if num_unique < 3:
-                self.df[column_name] = self.df[column_name].astype('bool')
+                self.df[column] = self.df[column].astype('bool')
             else:
                 print('Data cannot be converted to boolean type')
     
-    def manual_to_categorical(self, column_name):
+    def manual_to_categorical(self, column):
 
-        if column_name not in self.column_names:
+        if column not in self.column_names:
             print('Not a valid column name')
         else:
-            self.df[column_name] = self.df[column_name].astype('category')
+            self.df[column] = self.df[column].astype('category')
 
 
 class DataFrameInfo:
@@ -68,31 +67,27 @@ class DataFrameInfo:
     
     def describe_columns(self):
         # Describe all columns in the DataFrame to check their data types
-
         data_types = list(self.df.dtypes)       
         for column in self.column_names:
             print(column, self.df[column].dtype, self.df[column].nunique())
     
     def extract_stats(self):
         # Extract statistical values: median, standard deviation and mean from the columns and the DataFrame
-
         for column in self.column_names:
             if is_numeric_dtype(self.df[column]) == True:
                 print(f'\n{column} \nmean : {self.df[column].mean()} \nmedian : {self.df[column].median()} \nstandard deviation : {self.df[column].std()}')
     
-    def manual_extract_stats(self, column_name):
-
-        if column_name not in self.column_names:
+    def manual_extract_stats(self, column):
+        if column not in self.column_names:
             print('Not a valid column name')
         else:
-            if is_numeric_dtype(self.df[column_name]) == True:
-                print(f'\n{column_name} \nmean : {self.df[column_name].mean()} \nmedian : {self.df[column_name].median()} \nstandard deviation : {self.df[column_name].std()}')
+            if is_numeric_dtype(self.df[column]) == True:
+                print(f'\n{column} \nmean : {self.df[column].mean()} \nmedian : {self.df[column].median()} \nstandard deviation : {self.df[column].std()}')
             else:
                 print('Not a numerical column')
 
     def count_category_columns(self):
         # Count distinct values in categorical columns
-
         for column in self.column_names:
             if self.df[column].dtype == 'category':
                 count = self.df[column].value_counts()
@@ -100,7 +95,6 @@ class DataFrameInfo:
     
     def count_boolean_columns(self):
         # Count distinct values in boolean columns
-
         for column in self.column_names:
             if self.df[column].dtype == 'bool':
                 count = self.df[column].value_counts()
@@ -108,18 +102,15 @@ class DataFrameInfo:
   
     def print_shape(self):
         # Print out the shape of the DataFrame
-
         shape = self.df.shape
         print(f'This dataset has {shape[0]} rows and {shape[1]} columns')
     
     def percentage_null(self):
         # Generate a count/percentage count of NULL values in each column
-
         print("Percentage of missing values in each column:")
         print(self.df.isna().mean() * 100)
     
     def find_columns_with_missing_values(self):
-
         columns_with_null_values = []
         for column in self.column_names:
             if self.df[column].isnull().values.any() == True:
@@ -145,20 +136,26 @@ class Plotter:
                                  if self.df[col].dtype == 'float64' or self.df[col].dtype == 'int64']
         self.categorical_features = [col for col in self.df.columns[2:] if col not in self.numeric_features]
     
-    def histogram(self, column_name, bins = 50):
-        self.df[column_name].hist(bins=bins)
-        plt.xlabel(column_name)
-        plt.ylabel('Frequency')
-        plt.title('Histogram')
-        plt.show()
+    def histogram(self, column, bins = 50):
+        if column not in self.column_names:
+            print('Not a valid column name')
+        else:
+            self.df[column].hist(bins=bins)
+            plt.xlabel(column)
+            plt.ylabel('Frequency')
+            plt.title('Histogram')
+            plt.show()
     
-    def kde_plot(self, column_name):
-        sns.histplot(data=self.df, x=column_name, kde=True)
-        sns.despine()
-        plt.xlabel('Count')
-        plt.ylabel(column_name)
-        plt.title('Probability Density Function Plot')
-        plt.show()
+    def kde_plot(self, column):
+        if column not in self.column_names:
+            print('Not a valid column name')
+        else:
+            sns.histplot(data=self.df, x=column, kde=True)
+            sns.despine()
+            plt.xlabel('Count')
+            plt.ylabel(column)
+            plt.title('Probability Density Function Plot')
+            plt.show()
 
     def multi_kde(self):
         sns.set_theme(font_scale=0.7)
@@ -170,27 +167,33 @@ class Plotter:
     def qq_plot(self, column):
         if column not in self.column_names:
             print('Not a valid column name')
-        qq_plot = qqplot(self.df[column] , scale=1 ,line='q', fit=True)
-        plt.show()
-    
-    def box_and_whiskers(self, column_name):
-        fig = px.box(self.df, y=column_name,width=600, height=500)
-        fig.show()
+        else:
+            qq_plot = qqplot(self.df[column] , scale=1 ,line='q', fit=True)
+            plt.show()
     
     def box_plot(self, column):
-        plt.figure(figsize=(10, 5))
-        sns.boxplot(data=self.df, y=column, color='lightgreen', showfliers=True)
-        plt.title(f'Box plot of {column}')
-        plt.show()
+        if column not in self.column_names:
+            print('Not a valid column name')
+        else:
+            plt.figure(figsize=(10, 5))
+            sns.boxplot(data=self.df, y=column, color='lightgreen', showfliers=True)
+            plt.title(f'Box plot of {column}')
+            plt.show()
     
-    def violin(self, column_name):
-        sns.violinplot(data=self.df, y=column_name)
-        sns.despine
-        plt.show()
+    def violin(self, column):
+        if column not in self.column_names:
+            print('Not a valid column name')
+        else:
+            sns.violinplot(data=self.df, y=column)
+            sns.despine
+            plt.show()
 
     def countplot(self, column):
-        sns.countplot(self.df, x=column)
-        plt.show()
+        if column not in self.column_names:
+            print('Not a valid column name')
+        else:
+            sns.countplot(self.df, x=column)
+            plt.show()
     
     def discrete_prob_dist(self, column_name):
         if column_name not in self.column_names:
@@ -217,10 +220,13 @@ class Plotter:
             plt.show()
             
     def boxplot_by_category(self, column_1, column_2):
-        plt.figure(figsize=(10, 5))
-        sns.boxplot(data=self.df, x=column_1, y=column_2, color='lightgreen', showfliers=True)
-        plt.title(f'Box plot of {column_2} by {column_1}')
-        plt.show()
+        if column_1 not in self.column_names or column_2 not in self.column_names:
+            print('Not a valid column name')
+        else:        
+            plt.figure(figsize=(10, 5))
+            sns.boxplot(data=self.df, x=column_1, y=column_2, color='lightgreen', showfliers=True)
+            plt.title(f'Box plot of {column_2} by {column_1}')
+            plt.show()
         
     def scatter_plot(self, column_1, column_2):
         if column_1 not in self.column_names or column_2 not in self.column_names:

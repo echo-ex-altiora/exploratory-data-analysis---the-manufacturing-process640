@@ -1,11 +1,12 @@
 from db_utils import RDSDatabaseConnector
+from db_utils import load_dataframe
 from EDA_classes import DataTransform
 from EDA_classes import DataFrameInfo
 from EDA_classes import Plotter
 from EDA_classes import DataframeTransform
 
 connect = RDSDatabaseConnector()
-failure_df = connect.extract_data()
+failure_df = load_dataframe()
 transform_dataset = DataTransform(failure_df)
 transform_dataset.auto_to_boolean()
 transform_dataset.manual_to_categorical('Type')

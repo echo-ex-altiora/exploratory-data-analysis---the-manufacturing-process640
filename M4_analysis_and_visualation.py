@@ -1,13 +1,14 @@
-# Milestone 3
+# Milestone 4
 
 from db_utils import RDSDatabaseConnector
+from db_utils import load_dataframe
 from EDA_classes import DataTransform
 from EDA_classes import DataFrameInfo
 from EDA_classes import Plotter
 from EDA_classes import DataframeTransform
 
 connect = RDSDatabaseConnector()
-failure_df = connect.extract_data()
+failure_df = load_dataframe()
 transform_dataset = DataTransform(failure_df)
 transform_dataset.auto_to_boolean()
 transform_dataset.manual_to_categorical('Type')
@@ -110,7 +111,7 @@ to avoid this.
 possible_failures = {'TWF':'Tool wear failure', 'HDF':'Heat dissipation failure', 'PWF':'Power failure', 'OSF':'Overstrain failure', 'RNF':'Random failure'}
 for key, value in possible_failures.items():
     print('\n', value)
-    operating_ranges_by_failure = failure_df.groupby([key], observed=False)[[numeric_features]].agg(['min', 'max', 'mean'])
+    operating_ranges_by_failure = failure_df.groupby([key], observed=False)[numeric_features].agg(['min', 'max', 'mean'])
     print(operating_ranges_by_failure)
 
 '''

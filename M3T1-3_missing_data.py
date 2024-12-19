@@ -105,10 +105,6 @@ transform.impute_with_mean('Tool wear [min]')
 # Lets further investigate the correlation between process and air temp 
 plot.scatter_plot('Air temperature [K]', 'Process temperature [K]')
 
-# To check if your data are MAR, 
-# take each column with missingness and recode it as one if it is missing and zero otherwise. 
-# Then regress each of the the other variables onto it using a logistic regression. 
-# A significant p-value indicates an association between the regressor and missingness, meaning your data are MAR.
 
 # One potential approach we could take, since they are strongly correlated, 
 # is to use the mean of the difference to impute the missing values
