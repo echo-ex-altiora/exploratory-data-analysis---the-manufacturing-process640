@@ -15,37 +15,38 @@ transform = DataframeTransform(failure_df)
 transform.impute_with_median('Tool wear [min]')
 transform.impute_with_mean('Air temperature [K]')
 transform.impute_with_mean('Process temperature [K]')
-transform.correct_skew_log("Air temperature [K]")
 transform.correct_skew_boxcox("Rotational speed [rpm]")
-
-import numpy as np
-import matplotlib.pyplot as plt
-import seaborn as sns # type: ignore
-from scipy.stats import linregress # type: ignore
 
 
 column_names = list(failure_df.columns)
 numeric_features = [col for col in failure_df.columns[1:]
                     if failure_df[col].dtype == 'float64' or failure_df[col].dtype == 'int64']
 
-
-# First, we want to check for outliers in each column
+'''
+Step 1 : First visualise your data using your Plotter class to determine if the columns contain outliers.
+'''
 
 # Visual methods for detecting outliers are box plots and histograms
 
-plot.box_plot('Air temperature [K]') # zero outliers
-plot.histogram('Air temperature [K]', 100) # zero outliers
+plot.box_plot('Air temperature [K]') 
+plot.histogram('Air temperature [K]', 100) 
 plot.box_plot('Process temperature [K]')
 plot.histogram('Process temperature [K]', 100)
 plot.box_plot('Rotational speed [rpm]')
 plot.histogram('Rotational speed [rpm]', 100)
 plot.box_plot('Torque [Nm]')
 plot.histogram('Torque [Nm]', 100)
+plot.box_plot('Tool wear [min]')
+plot.histogram('Tool wear [min]', 100)
+
+# From initial visual inspection, we can determine that:
+# - Air temperature [K] and Tool wear [min] have 0 potential outliers 
+# - Process temperature [K] may have a couple on the lower end
+# - Rotation speed [rpm] and Torque [Nm] both seem to have quite alot of potential outliers on the boxplot
 
 # Statistical methods are z-score and Interquartile range
 
 # Calculate the Z-Scores
-#
 for column in numeric_features:
     mean = failure_df[column].mean()
     std = failure_df[column].std()
@@ -57,7 +58,6 @@ for column in numeric_features:
     if len(subset) == 0:
         print(f'{column} has 0 potential outliers \n')
     else:
-        print(subset)
         print(f'Number of potential outliers is : {len(subset)} \n')
 
 
@@ -76,11 +76,10 @@ for column in numeric_features:
     print(f"Q1 (25th percentile): {Q1}")
     print(f"Q3 (75th percentile): {Q3}")
     print(f"IQR: {IQR}")
-    outliers = failure_df[(failure_df[column] < (Q1 - 2 * IQR)) | (failure_df[column] > (Q3 + 2 * IQR))]
+    outliers = failure_df[(failure_df[column] < (Q1 - 1.5 * IQR)) | (failure_df[column] > (Q3 + 1.5 * IQR))]
     if len(outliers) > 0:
         print(f'The number of potential outliers : {len(outliers)}')
         print(f"Outliers of {column} column:")
-        print(outliers[column])
         print('\n')
     else:
         print(f'{column} has 0 outliers \n')
@@ -90,20 +89,22 @@ for column in numeric_features:
 
 # Summary Process temp has 10 potential outliers, rotational speed has 90 potential outliers, torque has 69 potential outliers
 
+'''
+Step 2: Once identified use a method to transform or remove the outliers from the dataset. Build this method in your DataFrameTransform class.
+'''
+transform.remove_outliers_IQR('Rotational speed [rpm]', 1.5)
+transform.remove_outliers_IQR('Torque [Nm]', 1.5)
 
+'''
+Step 3: With the outliers transformed/removed re-visualise your data with you Plotter class to check that the outliers have been correctly removed.
+'''
 plot.box_plot('Rotational speed [rpm]')
 plot.histogram('Rotational speed [rpm]', 100)
-transform.remove_outliers_IQR('Rotational speed [rpm]', 2)
-plot.box_plot('Rotational speed [rpm]')
-plot.histogram('Rotational speed [rpm]', 100)
-
 
 plot.box_plot('Torque [Nm]')
 plot.histogram('Torque [Nm]', 100)
-transform.remove_outliers_IQR('Torque [Nm]', 2)
-transform.remove_outliers_z_score('Torque [Nm]')
-plot.box_plot('Torque [Nm]')
-plot.histogram('Torque [Nm]', 100)
+
+
 
 # Secondly, compare the columns for correlation and
 # investigate any data points that deviate significantly from the general trend, indicating potential outliers
