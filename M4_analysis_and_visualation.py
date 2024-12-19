@@ -74,7 +74,7 @@ print(f'{machine_failure_by_type} \n')
 machine_failure_by_type_normalised = failure_df.groupby(['Type'], observed=False)['Machine failure'].value_counts(normalize=True) * 100
 print(f'{machine_failure_by_type_normalised} \n')
 # There are over 10x the amount of machine failures on low quality products as high quality products, however 
-# there are far more low quality roducts produced and when we look at the percentage of machine failure by type...
+# there are far more low quality products produced and when we look at the percentage of machine failure by type...
 failure_df['Machine failure'].value_counts(normalize=True) * 100
 # Machine failure is actually less than twice as likely to occur on low quality products than high
 
